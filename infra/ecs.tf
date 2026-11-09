@@ -23,9 +23,9 @@ resource "aws_ecs_express_gateway_service" "wishifai" {
     }
 
     environment {
-    name  = "AWS_REGION"
-    value = var.aws_region
-    
+      name  = "AWS_REGION"
+      value = var.aws_region
+
     }
   }
 }
