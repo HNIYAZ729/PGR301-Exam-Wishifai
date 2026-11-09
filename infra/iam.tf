@@ -10,7 +10,6 @@ data "aws_iam_policy_document" "ecs_task_assume_role" {
   }
 }
 
-
 resource "aws_iam_role" "wishifai_task_role" {
   name               = "wishifai-task-${var.candidate_number}"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
@@ -22,6 +21,7 @@ resource "aws_iam_role_policy" "wishifai_permissions" {
 
   policy = jsonencode({
     Version = "2012-10-17"
+
     Statement = [
       {
         Effect = "Allow"
@@ -44,6 +44,13 @@ resource "aws_iam_role_policy" "wishifai_permissions" {
           "bedrock:InvokeModel"
         ]
         Resource = "arn:aws:bedrock:${var.aws_region}::foundation-model/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:PutMetricData"
+        ]
+        Resource = "*"
       }
     ]
   })
