@@ -1,5 +1,8 @@
 package no.pgr301.exam.controller;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+
 import no.pgr301.exam.model.AnalyzeResponse;
 import no.pgr301.exam.service.WishlistService;
 import org.springframework.http.MediaType;
@@ -19,9 +22,13 @@ import java.util.Map;
 public class AppController {
 
     private final WishlistService wishlist;
+    private final Counter analysisCounter;
 
-    public AppController(WishlistService wishlist) {
-        this.wishlist = wishlist;
+    public AppController(WishlistService wishlist, MeterRegistry meterRegistry) {
+    this.wishlist = wishlist;
+    this.analysisCounter = Counter.builder("wishifai.analysis.count")
+            .description("Number of image analysis requests")
+            .register(meterRegistry);
     }
 
     @GetMapping("/health")
@@ -31,6 +38,8 @@ public class AppController {
 
     @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public AnalyzeResponse analyze(@RequestParam("image") MultipartFile image) throws IOException {
+        analysisCounter.increment();
         return wishlist.process(image.getBytes(), image.getOriginalFilename(), image.getContentType());
     }
+
 }
