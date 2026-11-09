@@ -1,10 +1,7 @@
 Oppgave 1
 1A - Containerisering
-Jeg har laget en multi stage Dockerfile for wishifai applikasjon, som er utviklet med Java og Spring Boot.
-Dockerfile består av 2 steg. I det første steget brukes Marven og Java 21 til å bygge applikasjonen til en JAP-fil. I det andre siste steget brukes Java 21 JRE til å kjøre den ferdige applikasjonen.
-
-Fordelen med multi-stage build er at marven, kildekoden og andre byggeverktøy ikke trenger å være med i det endelige Docker-imaget.
-Dette gjør imaget mindre og reduserer antall unødvendige komponenter.
+Jeg har laget en multi-stage Dockerfile med to steg. Først brukes Maven og Java 21 til å bygge Spring Boot applikasjonen til en JAR-fil. 
+Deretter brukes Java 21 JRE til å kjøre applikasjonen. dette gir mindre Docker.image uten unødvendige byggeverktøy.
 
 Jeg har bygget og testet Docker-imaget lokalt med følgende kommandoer:
 docker build -t wishifai:lokal .
@@ -17,10 +14,30 @@ Jeg har satt opp en GitHub Actions-workflow i .github/workflow/ci.yml for å aut
 
 Workflowen starter automatisk når jeg pusher endringer til main. Den heter prosjektkoden, konfigurerer AWS tilgang, logger inn i ECR, gybber Docker-imaget og publiserer det til repositoryet wishifai-41.
 
-Jeg har valgt å bruke Git-commit-SHA som image tag i stedet for bare latest. Dette gjør det mulig å identifisere hvilken versjon av kildekoden et Docker-imaget er byggget fra, og gjør det enklere å spore versjoner ved feil eller behov for tilbakerulling.
-
+Jeg bruker Git-commit-SHA som image tag for å kunne spore versjoner og enklere rulle tilbake ved feil. 
 AWS tilgangsnøkkelene er lagret som Github action secrets (AWS_ACCESS_KEY_ID og AWS_SECRET_ACCESS_KEY), slik at de ikke ligger direkte i workflow-filen.
 
-jeg har testet workflowen ved å pushe endringer til main. Github actions fullførte kjøringen uten feil, og jeg bekrefter at docker-imaget ble publisert til AWS ECR med commit-SHA som tag.
+https://github.com/HNIYAZ729/PGR301-Exam-Wishifai/actions/runs/42224940263
+
+Oppgave 2
+1A - ECS Express og Terraform
+Jeg har brukt Terraform til å opprette en ECS Express tjeneste og en S3 bucket (wishifai-images-41).
+
+ECS kjører Docker-imaget fra ECR. Jeg har opprettet en IAM Task Role som gir applikasjonene nødvendige AWS-tillatelser. 
+S3 bucketen settes automatisk som miljøvariabel.
+
+https://wi-914d13c45531484794577969ae42efeb.ecs.eu-north-1.on.aws
+
+2B - Remote State
+Jeg lagrer Terraform State i S3 i stedet for lokalt.
+* Bucket: pgr301-terraform-state
+* Nøkkel: wishifai/41/terraform.tfstate
+
+Dette gjør at flere utviklere kan bruke samme Tarrefom State
+
+2C - Terraform i GitHub Actions
+
+Jeg har konfigurert Github Actions slik at Terraform kjører etter at Docker-imaget er bygget og publisert til ECR.
+Dette sikret at imaget er tilgjengelig før ECS oppdateres. Terraform bruker samme Git-commit-SHA ved deployment.
 
 https://github.com/HNIYAZ729/PGR301-Exam-Wishifai/actions/runs/42224940263

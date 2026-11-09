@@ -21,5 +21,11 @@ resource "aws_ecs_express_gateway_service" "wishifai" {
       name  = "S3_BUCKET"
       value = aws_s3_bucket.wishifai_images.bucket
     }
+
+    environment {
+    name  = "AWS_REGION"
+    value = var.aws_region
+    
+    }
   }
 }
