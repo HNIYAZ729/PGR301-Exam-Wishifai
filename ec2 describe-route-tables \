@@ -1,0 +1,29 @@
+[
+    {
+        "RouteTableId": "rtb-201cce49",
+        "Associations": [
+            {
+                "Main": true,
+                "RouteTableAssociationId": "rtbassoc-4bc61422",
+                "RouteTableId": "rtb-201cce49",
+                "AssociationState": {
+                    "State": "associated"
+                }
+            }
+        ],
+        "Routes": [
+            {
+                "DestinationCidrBlock": "172.31.0.0/16",
+                "GatewayId": "local",
+                "Origin": "CreateRouteTable",
+                "State": "active"
+            },
+            {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": "igw-7c964715",
+                "Origin": "CreateRoute",
+                "State": "active"
+            }
+        ]
+    }
+]

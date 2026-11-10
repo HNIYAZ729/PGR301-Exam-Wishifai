@@ -1,0 +1,80 @@
+[
+    [
+        "LiveTaskCount",
+        [
+            {
+                "Name": "ServiceName",
+                "Value": "wishifai-36"
+            },
+            {
+                "Name": "ClusterName",
+                "Value": "default"
+            }
+        ]
+    ],
+    [
+        "MemoryUtilization",
+        [
+            {
+                "Name": "ServiceName",
+                "Value": "wishifai-36"
+            },
+            {
+                "Name": "ClusterName",
+                "Value": "default"
+            }
+        ]
+    ],
+    [
+        "CPUUtilization",
+        [
+            {
+                "Name": "ServiceName",
+                "Value": "wishifai-36"
+            },
+            {
+                "Name": "ClusterName",
+                "Value": "default"
+            }
+        ]
+    ],
+    [
+        "MemoryUtilization",
+        [
+            {
+                "Name": "ServiceName",
+                "Value": "wishifai-41"
+            },
+            {
+                "Name": "ClusterName",
+                "Value": "default"
+            }
+        ]
+    ],
+    [
+        "CPUUtilization",
+        [
+            {
+                "Name": "ServiceName",
+                "Value": "wishifai-41"
+            },
+            {
+                "Name": "ClusterName",
+                "Value": "default"
+            }
+        ]
+    ],
+    [
+        "LiveTaskCount",
+        [
+            {
+                "Name": "ServiceName",
+                "Value": "wishifai-41"
+            },
+            {
+                "Name": "ClusterName",
+                "Value": "default"
+            }
+        ]
+    ]
+]
