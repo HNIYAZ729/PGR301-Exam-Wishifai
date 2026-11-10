@@ -41,3 +41,12 @@ Jeg har konfigurert Github Actions slik at Terraform kjører etter at Docker-ima
 Dette sikret at imaget er tilgjengelig før ECS oppdateres. Terraform bruker samme Git-commit-SHA ved deployment.
 
 https://github.com/HNIYAZ729/PGR301-Exam-Wishifai/actions/runs/42224940263
+
+Oppgave 3
+I denne oppgaven har jeg brukt Amazon Cloudwatch til å overvåke wishifai applikasjonen. Jeg har opprettet en egendefinert metrikk for antall bildeanalyseforsøk, og lastet et dashborad med Terraform. Dashbordet viser antall bildeanalyseforsøk, CPU-bruk i ECS og 
+JVM minnebruk.
+
+Jeg har også opprettet en alarm som utløses dersom metrikken oversiger 20 i løpet av fem minutter, for å oppdage uvanlig høy aktivitet. Til slutt kontrollerte jeg dashbordet viste målinger og at alarmen hadde status ok. Dette har gitt meg bedre forståelse av hvordan Cloudwatch kan brukes til å følge med på applikasjonen og ressursbruken. 
+
+Cloudwatch Dashbord: wishifai-41-dashboard
+Cloudwatch Alarm: wishifai-41-analysis-alarm
