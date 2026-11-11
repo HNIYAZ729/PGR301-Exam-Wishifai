@@ -1,13 +1,24 @@
 # Oppgave 1
 1A - Containerisering
-Jeg har laget en multi-stage Dockerfile med to steg. Først brukes Maven og Java 21 til å bygge Spring Boot applikasjonen til en JAR-fil. 
-Deretter brukes Java 21 JRE til å kjøre applikasjonen. dette gir mindre Docker.image uten unødvendige byggeverktøy.
+Jeg har laget en multi stage Dockerfile med to steg. Først brukes Maven og Java 21 til å bygge Spring Boot applikasjonen til en JAR-fil. Deretter brukes Java 21 JRE til å kjøre applikasjonen. Dette gir et mindre Docker image uten unødvendige byggeverktøy. 
 
-Jeg har bygget og testet Docker-imaget lokalt med følgende kommandoer:
+Jeg har bygget og testet Dockerimaget lokalt med følgende kommandoer:
 docker build -t wishifai:lokal .
 docker run --name wishifai-test -p 9999:8080 wishifai:lokal
 
-port 9999 på vertsmaskinen kobles til port 8080 inne i containeren. Jeg kontrollerte at spring boot applikasjonen startet ved å kalle /actuator/health, som returnerte HTTP 200 med status UP.
+Port 9999 på vertsmaskinen kobles til port 8080 inne i containeren. Jeg kontrollerte at Spring Boot startet ved å kalle /actuator/health, som returnerte HTTP 200 med status UP.
+Jeg har publisert dockerimaget til Docker Hub for at det kan hentes og kjøres uten å ha tilgang til mitt lokal image.
+https://hub.docker.com/r/huriyet/wishifai
+
+Imaget kan hentes og startes med:
+
+docker pull huriyet/wishifai:latest
+docker run --rm -p 9999:8080 huriyet/wishifai:latest
+
+Jeg har testet det publiserte imaget med:
+curl http://localhost:9999/actuator/health
+
+Dette returnerte status UP, som bekrefter at applikasjonen starter og svarer på helsesjekken. 
 
 1B - CI- Pipeline
 Jeg har satt opp en GitHub Actions-workflow i .github/workflows/ci.yml for å automatisere bygging og publisering av Docker-imaget til AWS elastic container registry.
@@ -20,11 +31,10 @@ AWS tilgangsnøkkelene er lagret som Github action secrets (AWS_ACCESS_KEY_ID og
 https://github.com/HNIYAZ729/PGR301-Exam-Wishifai/actions/runs/42224940263
 
 ## Oppgave 2
-2A - ECS Express og Terraform
-Jeg har brukt Terraform til å opprette en ECS Express tjeneste og en S3 bucket (wishifai-images-41).
+2A - Jeg har brukt Terraform til å opprette en ECS Express tjeneste og en S3 bucket: wishifai-images-41.
+ECS kjører Docker-imaget fra ECR. Jeg har opprettet en IAM task role som gir applikasjonen nødvendige AWS-tillatelser. S3-bucketen settes automatisk som miljøvariabel.
 
-ECS kjører Docker-imaget fra ECR. Jeg har opprettet en IAM Task Role som gir applikasjonene nødvendige AWS-tillatelser. 
-S3 bucketen settes automatisk som miljøvariabel.
+I Terraform har jeg definert tre variabler: aws_region med verdien eu-north-1, candidate_number med verdien 41, og image_tag som angir hvilken versjon av Docker-imaget som skal brukes. Jeg har også definert en output kalt wishifai_url, som viser den offentlige URL-en til ECS applikasjonen. 
 
 https://wi-914d13c45531484794577969ae42efeb.ecs.eu-north-1.on.aws
 
@@ -37,19 +47,26 @@ Dette gjør at flere utviklere kan bruke samme Terrefom State
 
 2C - Terraform i GitHub Actions
 
-Jeg har konfigurert Github Actions slik at Terraform kjører etter at Docker-imaget er bygget og publisert til ECR. Dette sikrer at imaget er tilgjengelig før ECS tjenesten oppdateres. Terraform bruker samme Git-commit-SHA som image-tag, slik at jeg kan se hvilken versjon som er distribuert. Jeg har valgt å automatisere denne prosessen for å redusere manuelt arbeid og risikoen for feil ved deployment. Terraform skal også kontrollere formateringen før endringene brukes, slik at feil kan oppdages tidlig. 
+Jeg har konfigurert Github Actions slik at Terraform kjører etter at Docker-imaget er bygget og publisert til ECR. Dette sikrer at imaget er tilgjengelig før ECS tjenesten oppdateres. Terraform bruker samme Git-commit-SHA som image-tag, slik at jeg kan se hvilken versjon som er distribuert. Jeg har valgt å automatisere denne prosessen for å redusere manuelt arbeid og risikoen for feil ved deployment. 
+
+Pipelinen kjører terraform fmt -check for å kontrollere formateringen av Terraform-filene. Hvis filene ikke er riktig formatert, feiler dette steget i pipelinen. Terraform bruker også needs: build, slik at deployment først starter når build er fullført. 
 
 https://github.com/HNIYAZ729/PGR301-Exam-Wishifai/actions/runs/42224940263
 
 ### Oppgave 3
-3A - Jeg har brukt Amazon Cloudwatch og Micrometer til å overvåke wishifai applikasjonen. Jeg har implementere to timere som måler hvor lang tid AWS rekognition og Bedrock bruker på å svare. Disse heter wishifai.rekognition.duration og wishifai.bedrock.duration. 
+3A - Jeg har brukt Micrometer til å implementere to timere som måler hvor lang tid AWS Rekognition og Bedrock bruker på å svare. Disse heter wishifai.rekognition.duration og wishifai.bedrock.duration. 
 
-Jeg har også opprettet en egendefinert metrikk som teller antall bildeanalyseforsøk. Denne metrikken gjør det mulig å følge med på hvor mye applikasjonen blir brukt, og oppdage uvanlig aktivitetet. 
+Jeg valgte disse timerne fordi oppgaven handler om å finne ut hvorfor applikasjonen svarer langtsomt. Ved å sammenligne responstidene kan jeg undersøke om det er bildeanalysen i Rekognition eller genereringen av gaveforslag i Bedrock som bruker mest tid. Målingene fra 9.november viste at Rekognition brukte 1,4-1,6 sekunder, mens Bedrock brukte 14-16 sekunder. Bedrock var dermed den største flaskehalsen og brukte omtrent ti ganger så lang tid som Rekognition. 
 
-Det er konfigurert Micrometer til å sende målingene til Cloudwatch hvert minutt. Jeg valgte disse målingene fordi de kan hjelpe med å finne ut om det er Rekognition eller Bedrock som gjør applikasjonen treg, samtidig som man kan følge med på aktiviteten i tjenesten. 
+Jeg har også implementert en business metrikk som teller antall bildeanalyseforsøk. Jeg valgte denne fordi den viser hvor mye tjenesten brukes, og kan bidra til å oppdage uvanlig høy aktivitet.
 
-3B - Jeg har opprettet et Cloudwatch dashbord med Terraform. Dashbordet viser antall bildeanalyseforsøk, CPU bruk i ECS og JVM minneburk. 
-Jeg har også opprettet en alarm som utløses dersom metrikken oversiger 20 i løpet av fem minutter, for å oppdage uvanlig høy aktivitet. Til slutt kontrollerte jeg dashbordet viste målinger og at alarmen hadde status ok. Dette har gitt meg bedre forståelse av hvordan Cloudwatch kan brukes til å følge med på applikasjonen og ressursbruken. 
+Micrometer sender målingene til Cloudwatch hvert minutt. For å forbedre responstiden vill jeg undersøkt om en kortere prompt, færre genererte tokens eller en raskere Bedrock modell kunne redusere tiden det tar å generere gaveforslag. 
+
+3B - Jeg har opprettet et Cloudwatch-dashboard med Terraform. Dashbordet viser tre typer metrikker: en business-metrikk som teller antall bildeanalyseforsøk, en infrastrukturmetrikk som viser CPU-bruk i ECS, og en applikasjonsmetrikk som viser JVM-minnebruk. 
+
+Jeg har også opprettet en alarm som utløses dersom antall bildeanalyseforsøk overstiger 20 i løpet av fem minutter. Jeg valgte denne grensen for å oppdage uvanlig høy aktivitet, som kan føre til økt belastning og flere AWS-kall. Grensen er foreløpig og bør justeres basert på faktisk bruk. 
+
+Til slutt kontrollerte jeg at dashbordet viste målinger, og at alarmen hadde status OK. 
 
 Cloudwatch Dashbord: wishifai-41-dashboard
 Cloudwatch Alarm: wishifai-41-analysis-alarm
