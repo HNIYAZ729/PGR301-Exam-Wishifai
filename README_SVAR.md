@@ -28,7 +28,7 @@ Workflowen starter automatisk når jeg pusher endringer til main. Den henter pro
 Jeg bruker Git-commit-SHA som image tag for å kunne spore versjoner og enklere rulle tilbake ved feil. 
 AWS tilgangsnøkkelene er lagret som Github action secrets (AWS_ACCESS_KEY_ID og AWS_SECRET_ACCESS_KEY), slik at de ikke ligger direkte i workflow-filen.
 
-https://github.com/HNIYAZ729/PGR301-Exam-Wishifai/actions/runs/42224940263
+https://github.com/HNIYAZ729/PGR301-Exam-Wishifai/actions/runs/43099759848
 
 ## Oppgave 2
 2A - Jeg har brukt Terraform til å opprette en ECS Express tjeneste og en S3 bucket: wishifai-images-41.
@@ -51,7 +51,7 @@ Jeg har konfigurert Github Actions slik at Terraform kjører etter at Docker-ima
 
 Pipelinen kjører terraform fmt -check for å kontrollere formateringen av Terraform-filene. Hvis filene ikke er riktig formatert, feiler dette steget i pipelinen. Terraform bruker også needs: build, slik at deployment først starter når build er fullført. 
 
-https://github.com/HNIYAZ729/PGR301-Exam-Wishifai/actions/runs/42224940263
+https://github.com/HNIYAZ729/PGR301-Exam-Wishifai/actions/runs/43099759848
 
 ### Oppgave 3
 3A - Jeg har brukt Micrometer til å implementere to timere som måler hvor lang tid AWS Rekognition og Bedrock bruker på å svare. Disse heter wishifai.rekognition.duration og wishifai.bedrock.duration. 
